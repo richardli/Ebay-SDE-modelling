@@ -198,20 +198,20 @@ for(i in 1 : N.auc){
   Acc.add[i, ] <- temp[, 3]
 }
 
-github test{}
-#see if it appears?
-
 ## Local weighted regression
 mu <- rep(0, length(plotpoints))
 rsq <- rep(0, length(plotpoints))
+
+## max number of history retrieved: 
+kk.back <- kk*3
 for(i in 1:length(plotpoints)){
-	response <- Acc.add[ , (kk*(i-1)+1) : (kk*i+1)]
-	x <- Velo.add[, (kk*(i-1)+1) : (kk*i+1)]
+	response <- Acc.add[ , max(1, kk*i+1-kk.back) : (kk*i+1)]
+	x <- Velo.add[, max(1, kk*i+1-kk.back) : (kk*i+1)]
 	response <- as.vector(t(response))
 	x <- as.vector(t(x))
-	timediff <- seq(-kk , 0) * (7 / (Nt * kk))
-	weight <- rep(0, (kk+1))
-	for(j in 1:(kk+1)){
+	timediff <- seq(-length(x)/N.auc + 1 , 0) * (7 / ((Nt-1) * kk))
+	weight <- rep(0, length(timediff))
+	for(j in 1:length(weight)){
 		weight[j] <- kern(7/Nt, timediff[j])
 	}
 
