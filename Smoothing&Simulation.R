@@ -364,7 +364,7 @@ for(count in 1:rep){
     logprice.sde[i, 1] <-  log(EBAY[[i]]$Price[1])
     logprice.sde[i, 2] <- logprice.sde[i, 1] + Velo.smooth[i,1]*delta
     for (j in 3 : length(plotpoints)){
-      logprice.sde[i, j] <- logprice.sde[i, j-1] + (logprice.sde[i, j-1] - logprice.sde[i, j-2]) * exp(mu[j] * delta - sigma[j]^2/2 * delta + sigma[j] * rnorm(1, 0, sqrt(delta))) 
+      logprice.sde[i, j] <- logprice.sde[i, j-1] + (logprice.sde[i, j-1] - logprice.sde[i, j-2]) * (1 + mu[j] * delta + sigma[j] * rnorm(1, 0, sqrt(delta))) 
     }
   }
   
