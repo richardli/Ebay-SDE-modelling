@@ -203,7 +203,7 @@ mu <- rep(0, length(plotpoints))
 rsq <- rep(0, length(plotpoints))
 
 ## max number of history retrieved: 
-kk.back <- kk*3
+kk.back <- kk*20
 for(i in 1:length(plotpoints)){
 	response <- Acc.add[ , max(1, kk*i+1-kk.back) : (kk*i+1)]
 	x <- Velo.add[, max(1, kk*i+1-kk.back) : (kk*i+1)]
@@ -240,10 +240,21 @@ remove_outliers <- function(x, na.rm = TRUE, ...) {
   y
 }
 
+remove_quantile <- function(x, first, last){
+	qnt <- quantile(x, probs=c(first, last))
+	y <- x
+	y[x < qnt[1]] <- NA
+	y[x > qnt[2]] <- NA
+	y
+}
+
 table <- matrix(0, 190, Nt)
 for(i in 1:length(plotpoints)){
 	Et[ , i] <- (Acc.smooth[, i] - mu[i]*Velo.smooth[, i])/Velo.smooth[,i]
-	temp <- remove_outliers(Et[ , i])
+	## remove real outlier?
+	#temp <- remove_outliers(Et[ , i])
+	## or remove some percentile
+	temp <- remove_quantile(Et[, i], 0.2, 0.8)
 	table[which(is.na(temp)) ,i] <- 1 
 	temp2 <- Et[, i] * Velo.smooth[,i]
 	sigma[i] <- sd(temp[which(!is.na(temp))] / sqrt(7/Nt))
@@ -319,6 +330,7 @@ compReal <- function(Acc, plotpoints, EBAY){
 ## Check original fit
 errorlist <- compReal(LogPrice.smooth, plotpoints, EBAY)
 plot(errorlist)
+sum(errorlist)
 
 ## check ODE fit
 logprice.ode <- matrix(0, length(EBAY), length(plotpoints))
@@ -343,7 +355,7 @@ sum(error.ode)
 ## check SDE fit
 logprice.sde <- matrix(0, length(EBAY), length(plotpoints))
 delta <- 7/ (length(plotpoints) - 1 )
-sigma0 = c(rep(0.1,200),rep(0,1400),rep(0.3,400))
+#sigma0 = c(rep(0.1,200),rep(0,1400),rep(0.3,400))
 rep <- 5
 error.sde<-matrix(0, rep, length(EBAY))
 velo.sde <- matrix(0,length(EBAY),length(plotpoints) )
@@ -352,7 +364,7 @@ for(count in 1:rep){
     logprice.sde[i, 1] <-  log(EBAY[[i]]$Price[1])
     logprice.sde[i, 2] <- logprice.sde[i, 1] + Velo.smooth[i,1]*delta
     for (j in 3 : length(plotpoints)){
-      logprice.sde[i, j] <- logprice.sde[i, j-1] + (logprice.sde[i, j-1] - logprice.sde[i, j-2]) * exp(weight0[j] * delta - sigma0[j]^2/2 * delta + sigma0[j] * rnorm(1, 0, sqrt(delta))) 
+      logprice.sde[i, j] <- logprice.sde[i, j-1] + (logprice.sde[i, j-1] - logprice.sde[i, j-2]) * exp(mu[j] * delta - sigma[j]^2/2 * delta + sigma[j] * rnorm(1, 0, sqrt(delta))) 
     }
   }
   
