@@ -1,0 +1,78 @@
+Ebay test 
+========================================================
+
+The Ebay codes are uploaded to the github: **https://github.com/richardli/Ebay-SDE-modelling**
+
+First we gonna need package `fda`
+```{r, eval = FALSE}
+require("fda")
+library("fda")
+```
+
+```{r, echo=FALSE, cache=TRUE}
+
+setwd("~/Dropbox/Ebay_2012/SDE approach")
+load("ebay_data.rda") # With elemantary functions
+N.auc <- length(EBAY)
+##############################################################################################
+SPLINE=function(x, y, plotpoints){
+  knots <- c(0,1,2,3,4,5,6,6.25,6.5,6.75,6.8125,6.875,6.9375,7)
+	numk<-length(knots)
+	numplot <- length(plotpoints)
+	norder <- 5
+	nbasis <- numk + 2
+	lambda <- 0.1
+	numauct<-N.auc
+	wbasis <- create.bspline.basis(rangeval=c(0,7),nbasis=nbasis, norder=5)
+	Wfd <- list(0); length(Wfd) <- numauct
+	bids=rep(0,length(knots))
+	for(j in 1:length(knots)) bids[j]=StepCheck(x,y,knots[j])
+	Wfd <- Data2fd(knots,bids,basisobj=wbasis)
+
+	growfdPar <- fdPar(Wfd, 3, lambda)	
+	mss <-smooth.basis(knots,bids,growfdPar,wtvec=rep(1,length(knots)))
+	xfd <- mss$fd
+	splineF <- NULL
+	splinef <- NULL
+	splineF <- eval.fd(plotpoints,xfd)
+	splinef <- eval.fd(plotpoints,xfd,Lfd = 1)
+	splineff <- eval.fd(plotpoints, xfd, Lfd = 2)
+	return(cbind(splineF,splinef,splineff))
+}
+Nt <- 2000
+plotpoints <- seq(0,7,len = Nt)  #nodes where the smoothed curve is evaluated
+LogPrice.smooth <-  matrix(0, N.auc, length(plotpoints))
+Velo.smooth <-  matrix(0, N.auc, length(plotpoints))
+Acc.smooth <-  matrix(0, N.auc, length(plotpoints))
+
+for(i in 1 : N.auc){
+  temp <- SPLINE(EBAY[[i]]$Time,log(EBAY[[i]]$Price), plotpoints)
+  LogPrice.smooth[i, ] <- temp[, 1]
+  Velo.smooth[i, ] <- temp[, 2]
+  Acc.smooth[i, ] <- temp[, 3]
+ }
+ 
+par(mfrow = c(2, 2))
+
+plot(plotpoints, LogPrice.smooth[1, ], type = "l", col = "white", ylim = c(-20, 20))
+for(k in 1 : N.auc){
+	points(plotpoints, LogPrice.smooth[k, ], type = "l", col = k)
+}
+plot(plotpoints, Velo.smooth[1, ], type = "l", col = "white", ylim = c(-20,10))
+for(k in 1 : N.auc){
+	points(plotpoints, Velo.smooth[k, ], type = "l", col = k)
+}
+plot(plotpoints, Acc.smooth[1, ], type = "l", col = "white", ylim = c(-6,6))
+for(k in 1 : N.auc){
+	points(plotpoints, Acc.smooth[k, ], type = "l", col = k)
+}
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+Acc.M <- apply(Acc.smooth, 2, mean)
+Velo.M <- apply(Velo.smooth, 2, mean)
+plot(Velo.M, Acc.M, type = "l", xlim = c(0, 1), ylim = c(-.5, .5))
+```
+
