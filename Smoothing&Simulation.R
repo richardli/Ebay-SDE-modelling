@@ -315,7 +315,7 @@ compReal <- function(Acc, plotpoints, EBAY){
       # lower count of plotpoints for time[j]
       index <- as.integer( time[j]/timediff ) 
       # actual value of the plotpoints
-      a <- index * 7/length(plotpoints)
+      a <- index * 7/(length(plotpoints)-1)
       # linear estimation of fitted value
       # note index starts from 0, so need to add another 1.
       fitvalue <- (time[j]-a)/(timediff) * (logprice2[index+2] - logprice2[index+1]) + logprice2[index+1]
