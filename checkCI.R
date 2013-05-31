@@ -57,7 +57,7 @@ simApath <- function(mu, sigma, jump, plotpoints, realpath, velo.initial){
 	for(i in 3:length(plotpoints)){
 		## Here add the min change being 0??
 		## Not sure if leads to some theoretical difficulty
-		path[i] <- path[i-1] + min(0, (path[i-1] - path[i-2])*(1 + mu[i] * delta + sigma[i] * rnorm(1, 0, sqrt(delta))))
+		path[i] <- path[i-1] + (path[i-1] - path[i-2])*(1 + mu[i] * delta + sigma[i] * rnorm(1, 0, sqrt(delta)))
 	}
 	path
 }
