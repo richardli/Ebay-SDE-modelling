@@ -185,7 +185,7 @@ plot(plotpoints, Fratio, type = "l")
 kern <- function(h, u){(h^2 - u^2)*(u>-h && u <=0)}
 
 ## add more evaluation points locally --> divide each interval into kk sub-intervals
-kk <- 10
+kk <- 5
 addpoints <- seq(0,7,len=kk*(Nt-1)+1)
 LogPrice.add <-  matrix(0, N.auc, length(addpoints))
 Velo.add <-  matrix(0, N.auc, length(addpoints))
@@ -203,10 +203,10 @@ mu <- rep(0, length(plotpoints))
 rsq <- rep(0, length(plotpoints))
 
 ## max number of history retrieved: 
-kk.back <- kk*20
+kk.back <- kk*10
 for(i in 1:length(plotpoints)){
-	response <- Acc.add[ , max(1, kk*i+1-kk.back) : (kk*i+1)]
-	x <- Velo.add[, max(1, kk*i+1-kk.back) : (kk*i+1)]
+	response <- Acc.add[ , max(1, kk*(i-1)+1-kk.back) : (kk*(i-1)+1)]
+	x <- Velo.add[, max(1, kk*(i-1)+1-kk.back) : (kk*(i-1)+1)]
 	response <- as.vector(t(response))
 	x <- as.vector(t(x))
 	timediff <- seq(-length(x)/N.auc + 1 , 0) * (7 / ((Nt-1) * kk))
