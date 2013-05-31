@@ -102,7 +102,7 @@ for(i in 2 : Nsim){
 ## Simulation with Brownian Motion
 Nsim <- 100
 par(mfrow = c(2, 2))
-for(sigma in seq(0.1, 0.7, len = 4)){
+for(sigma0 in seq(0.1, 0.7, len = 4)){
 		y.sim <- matrix(0, Nsim, Nx)
 	for(j in 1:Nsim){
 		w.noise <- w + rnorm(Nx, mean = 0, sd = 0.01)
@@ -110,11 +110,11 @@ for(sigma in seq(0.1, 0.7, len = 4)){
 		c <- runif(1, 0, 10) 
 		y.sim[j, 2] <- y.sim[j, 1] + abs(rnorm(1, mean = 0, sd = 0.01))
 		for (i in 3 : Nx){
-		 	y.sim[j, i] <- y.sim[j, i-1] + (y.sim[j, i-1] - y.sim[j, i-2]) * exp(w.noise[i] * delta - sigma^2/2 * delta + sigma * rnorm(1, 0, sqrt(delta))) 
+		 	y.sim[j, i] <- y.sim[j, i-1] + (y.sim[j, i-1] - y.sim[j, i-2]) * (1+ w.noise[i] * delta + sigma0 * rnorm(1, 0, sqrt(delta)) ) #* exp(w.noise[i] * delta - sigma0^2/2 * delta + sigma0 * rnorm(1, 0, sqrt(delta))) 
 	    }
 	}
 	
-	plot(xx, y.sim[1, ], type = "l", ylim = c(-5, 15), main = paste("sigma =", sigma) )
+	plot(xx, y.sim[1, ], type = "l", ylim = c(-5, 15), main = paste("sigma0 =", sigma0) )
 	for(i in 2 : Nsim){
 		points(xx, y.sim[i, ], type = "l", lty = i, col = i)
 	}
@@ -185,7 +185,7 @@ plot(plotpoints, Fratio, type = "l")
 kern <- function(h, u){(h^2 - u^2)*(u>-h && u <=0)}
 
 ## add more evaluation points locally --> divide each interval into kk sub-intervals
-kk <- 10
+kk <- 5
 addpoints <- seq(0,7,len=kk*(Nt-1)+1)
 LogPrice.add <-  matrix(0, N.auc, length(addpoints))
 Velo.add <-  matrix(0, N.auc, length(addpoints))
@@ -203,10 +203,10 @@ mu <- rep(0, length(plotpoints))
 rsq <- rep(0, length(plotpoints))
 
 ## max number of history retrieved: 
-kk.back <- kk*20
+kk.back <- kk*10
 for(i in 1:length(plotpoints)){
-	response <- Acc.add[ , max(1, kk*i+1-kk.back) : (kk*i+1)]
-	x <- Velo.add[, max(1, kk*i+1-kk.back) : (kk*i+1)]
+	response <- Acc.add[ , max(1, kk*(i-1)+1-kk.back) : (kk*(i-1)+1)]
+	x <- Velo.add[, max(1, kk*(i-1)+1-kk.back) : (kk*(i-1)+1)]
 	response <- as.vector(t(response))
 	x <- as.vector(t(x))
 	timediff <- seq(-length(x)/N.auc + 1 , 0) * (7 / ((Nt-1) * kk))
